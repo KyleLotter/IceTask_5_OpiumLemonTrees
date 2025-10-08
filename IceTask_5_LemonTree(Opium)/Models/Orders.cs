@@ -1,5 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace IceTask_5_LemonTree_Opium_.Models
 {
@@ -10,6 +11,9 @@ namespace IceTask_5_LemonTree_Opium_.Models
 
         public int customer_id { get; set; }
 
+        [ForeignKey("customer_id")]
+        public Customers Customer { get; set; }
+
         public DateTimeOffset order_date { get; set; } = DateTimeOffset.Now;
 
         [Required]
@@ -17,8 +21,6 @@ namespace IceTask_5_LemonTree_Opium_.Models
 
         public string status { get; set; } = "pending";
 
-        // Navigation
-        public Customers Customer { get; set; }
         public List<OrderItems> OrderItems { get; set; }
     }
 }
