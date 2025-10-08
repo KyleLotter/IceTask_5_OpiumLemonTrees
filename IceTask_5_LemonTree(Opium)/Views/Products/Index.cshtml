@@ -1,0 +1,66 @@
+﻿@model IEnumerable<IceTask_5_LemonTree_Opium_.Models.Products>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.name)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.description)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.price)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.stock_quantity)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.image_url)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.created_at)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.name)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.description)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.price)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.stock_quantity)
+                </td>
+                <td>
+                    <img src="@item.image_url" alt="Picture" style="width: 250px; height: 180px;" /> @* Displaying image from VenueImageUrl *@
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.created_at)
+                </td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.product_id">Edit</a> |
+                    <a asp-action="Details" asp-route-id="@item.product_id">Details</a> |
+                    <a asp-action="Delete" asp-route-id="@item.product_id">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

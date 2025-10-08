@@ -1,0 +1,42 @@
+﻿@model IceTask_5_LemonTree_Opium_.Models.Orders
+
+@{
+    ViewData["Title"] = "Details";
+}
+
+<h1>Details</h1>
+
+<div>
+    <h4>Orders</h4>
+    <hr />
+    <dl class="row">
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.customer_id)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.customer_id)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.order_date)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.order_date)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.total_amount)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.total_amount)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.status)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.status)
+        </dd>
+    </dl>
+</div>
+<div>
+    <a asp-action="Edit" asp-route-id="@Model?.order_id">Edit</a> |
+    <a asp-action="Index">Back to List</a>
+</div>
