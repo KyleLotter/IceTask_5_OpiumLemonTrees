@@ -57,6 +57,7 @@ namespace IceTask_5_LemonTree_Opium_.Controllers
         {
             if (ModelState.IsValid)
             {
+                orders.order_date = DateTimeOffset.Now;
                 _context.Add(orders);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
