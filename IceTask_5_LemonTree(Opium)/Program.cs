@@ -1,3 +1,6 @@
+using IceTask_5_LemonTree_Opium_.Models;
+using Microsoft.EntityFrameworkCore;
+
 namespace IceTask_5_LemonTree_Opium_
 {
     public class Program
@@ -8,6 +11,10 @@ namespace IceTask_5_LemonTree_Opium_
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();
+
+            // Get the connection string to the database
+            builder.Services.AddDbContext<ApplicationDbContext>(options => 
+                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
             var app = builder.Build();
 
