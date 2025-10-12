@@ -1,44 +1,106 @@
 ﻿@model IceTask_5_LemonTree_Opium_.Models.Orders
 
 @{
-    ViewData["Title"] = "Edit";
+    ViewData["Title"] = "Edit Order";
 }
 
-<h1>Edit</h1>
-
-<h4>Orders</h4>
+<h1 class="page-title">Edit Order</h1>
+<h4 style="color:#60a5fa;font-weight:600;">Order Details</h4>
 <hr />
+
 <div class="row">
-    <div class="col-md-4">
-        <form asp-action="Edit">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="order_id" />
-            <div class="form-group">
-                <label asp-for="customer_id" class="control-label"></label>
-                <input asp-for="customer_id" class="form-control" />
-                <span asp-validation-for="customer_id" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="total_amount" class="control-label"></label>
-                <input asp-for="total_amount" class="form-control" />
-                <span asp-validation-for="total_amount" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="status" class="control-label"></label>
-                <input asp-for="status" class="form-control" />
-                <span asp-validation-for="status" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
-            </div>
-        </form>
+    <div class="col-md-6">
+        <div class="card p-4 shadow-sm">
+            <form asp-action="Edit">
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                <input type="hidden" asp-for="order_id" />
+
+                <div class="form-group mb-3">
+                    <label asp-for="customer_id" class="control-label"></label>
+                    <input asp-for="customer_id" class="form-control" />
+                    <span asp-validation-for="customer_id" class="text-danger"></span>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label asp-for="total_amount" class="control-label"></label>
+                    <input asp-for="total_amount" class="form-control" />
+                    <span asp-validation-for="total_amount" class="text-danger"></span>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label asp-for="status" class="control-label">Order Status</label>
+                    <select asp-for="status" class="form-control">
+                        <option value="Pending">Pending</option>
+                        <option value="Processed">Processed</option>
+                        <option value="Shipped">Shipped</option>
+                        <option value="Delivered">Delivered</option>
+                    </select>
+                    <span asp-validation-for="status" class="text-danger"></span>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label asp-for="status" class="control-label"></label>
+                    <input asp-for="status" class="form-control" />
+                    <span asp-validation-for="status" class="text-danger"></span>
+                </div>
+
+                <div class="form-group mt-4">
+                    <input type="submit" value="Save" class="btn btn-fancy btn-lg" />
+                    <a asp-action="Index" class="btn btn-secondary btn-fancy">Back to List</a>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
-
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }
+
+<style>
+    body {
+        background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%);
+    }
+
+    .page-title {
+        color: #6366f1;
+        font-weight: 700;
+        letter-spacing: 1px;
+        margin-bottom: 24px;
+        text-shadow: 0 2px 8px #e0e7ff;
+    }
+
+    .form-group label {
+        color: #6366f1;
+        font-weight: 500;
+    }
+
+    .form-control:focus {
+        border-color: #6366f1;
+        box-shadow: 0 0 0 0.2rem rgba(99,102,241,.25);
+    }
+
+    .btn-fancy {
+        background: linear-gradient(90deg, #6366f1 0%, #60a5fa 100%);
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        padding: 6px 18px;
+        font-weight: 500;
+        transition: background 0.2s;
+        margin-right: 8px;
+    }
+
+        .btn-fancy:hover {
+            background: linear-gradient(90deg, #60a5fa 0%, #6366f1 100%);
+            color: #fff;
+        }
+
+    .card {
+        border-radius: 16px;
+        box-shadow: 0 4px 24px rgba(60, 72, 88, 0.12);
+        background: #fff;
+    }
+</style>

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using IceTask_5_LemonTree_Opium_.Models;
 
@@ -33,7 +32,10 @@ namespace IceTask_5_LemonTree_Opium_.Controllers
             }
 
             var orders = await _context.Orders
+                .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.Product)
                 .FirstOrDefaultAsync(m => m.order_id == id);
+
             if (orders == null)
             {
                 return NotFound();
@@ -43,26 +45,165 @@ namespace IceTask_5_LemonTree_Opium_.Controllers
         }
 
         // GET: Orders/Create
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
-            return View();
+            var products = await _context.Products
+                .Where(p => p.stock_quantity > 0)
+                .ToListAsync();
+
+            var viewModel = new CartViewModel
+            {
+                CartItems = products.Select(p => new CartItemViewModel
+                {
+                    ProductId = p.product_id,
+                    ProductName = p.name,
+                    Price = p.price,
+                    AvailableStock = p.stock_quantity,
+                    Quantity = 0
+                }).ToList()
+            };
+
+            return View(viewModel);
         }
 
         // POST: Orders/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        // STOCK CONTROL IMPLEMENTATION WITH TRANSACTIONS
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("order_id,customer_id,order_date,total_amount,status")] Orders orders)
+        public async Task<IActionResult> Create(CartViewModel cartViewModel)
         {
-            if (ModelState.IsValid)
+            // Filter out items with quantity 0
+            var itemsToOrder = cartViewModel.CartItems.Where(item => item.Quantity > 0).ToList();
+
+            if (!itemsToOrder.Any())
             {
-                orders.order_date = DateTimeOffset.Now;
-                _context.Add(orders);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                ModelState.AddModelError("", "Please select at least one product with a quantity greater than 0.");
+
+                // Reload product data for the view
+                var products = await _context.Products.Where(p => p.stock_quantity > 0).ToListAsync();
+                cartViewModel.CartItems = products.Select(p =>
+                {
+                    var existingItem = cartViewModel.CartItems.FirstOrDefault(ci => ci.ProductId == p.product_id);
+                    int quantity = 0;
+                    if (existingItem != null)
+                    {
+                        quantity = existingItem.Quantity;
+                    }
+
+                    return new CartItemViewModel
+                    {
+                        ProductId = p.product_id,
+                        ProductName = p.name,
+                        Price = p.price,
+                        AvailableStock = p.stock_quantity,
+                        Quantity = quantity
+                    };
+                }).ToList();
+
+                return View(cartViewModel);
             }
-            return View(orders);
+
+            // START TRANSACTION - Critical for stock control!
+            using (var transaction = await _context.Database.BeginTransactionAsync())
+            {
+                try
+                {
+                    // STEP 1: CHECK STOCK for all items
+                    foreach (var item in itemsToOrder)
+                    {
+                        var product = await _context.Products.FindAsync(item.ProductId);
+
+                        if (product == null)
+                        {
+                            ModelState.AddModelError("", $"Product with ID {item.ProductId} not found.");
+                            await transaction.RollbackAsync();
+                            return View(cartViewModel);
+                        }
+
+                        // Check if sufficient stock is available
+                        if (product.stock_quantity < item.Quantity)
+                        {
+                            ModelState.AddModelError("",
+                                $"Insufficient stock for {product.name}. Available: {product.stock_quantity}, Requested: {item.Quantity}");
+                            await transaction.RollbackAsync();
+
+                            // Reload product data for the view
+                            var products = await _context.Products.Where(p => p.stock_quantity > 0).ToListAsync();
+                            cartViewModel.CartItems = products.Select(p => new CartItemViewModel
+                            {
+                                ProductId = p.product_id,
+                                ProductName = p.name,
+                                Price = p.price,
+                                AvailableStock = p.stock_quantity,
+                                Quantity = cartViewModel.CartItems.FirstOrDefault(ci => ci.ProductId == p.product_id)?.Quantity ?? 0
+                            }).ToList();
+
+                            return View(cartViewModel);
+                        }
+                    }
+
+                    // STEP 2: DECREASE STOCK for all items
+                    foreach (var item in itemsToOrder)
+                    {
+                        var product = await _context.Products.FindAsync(item.ProductId);
+                        product.stock_quantity -= item.Quantity;
+                        _context.Products.Update(product);
+                    }
+
+                    // STEP 3: CREATE ORDER
+                    var order = new Orders
+                    {
+                        customer_id = cartViewModel.CustomerId,
+                        order_date = DateTimeOffset.Now,
+                        total_amount = itemsToOrder.Sum(item => item.LineTotal),
+                        status = "pending"
+                    };
+
+                    _context.Orders.Add(order);
+                    await _context.SaveChangesAsync(); // Save to get order_id
+
+                    // STEP 4: CREATE ORDER ITEMS
+                    foreach (var item in itemsToOrder)
+                    {
+                        var orderItem = new OrderItems
+                        {
+                            order_id = order.order_id,
+                            product_id = item.ProductId,
+                            quantity = item.Quantity,
+                            price_at_purchase = item.Price
+                        };
+
+                        _context.OrderItems.Add(orderItem);
+                    }
+
+                    await _context.SaveChangesAsync();
+
+                    // COMMIT TRANSACTION - All operations successful!
+                    await transaction.CommitAsync();
+
+                    TempData["SuccessMessage"] = $"Order #{order.order_id} created successfully!";
+                    return RedirectToAction(nameof(Details), new { id = order.order_id });
+                }
+                catch (Exception ex)
+                {
+                    // ROLLBACK on any error
+                    await transaction.RollbackAsync();
+                    ModelState.AddModelError("", $"An error occurred while processing your order: {ex.Message}");
+
+                    // Reload product data for the view
+                    var products = await _context.Products.Where(p => p.stock_quantity > 0).ToListAsync();
+                    cartViewModel.CartItems = products.Select(p => new CartItemViewModel
+                    {
+                        ProductId = p.product_id,
+                        ProductName = p.name,
+                        Price = p.price,
+                        AvailableStock = p.stock_quantity,
+                        Quantity = cartViewModel.CartItems.FirstOrDefault(ci => ci.ProductId == p.product_id)?.Quantity ?? 0
+                    }).ToList();
+
+                    return View(cartViewModel);
+                }
+            }
         }
 
         // GET: Orders/Edit/5
@@ -82,8 +223,6 @@ namespace IceTask_5_LemonTree_Opium_.Controllers
         }
 
         // POST: Orders/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("order_id,customer_id,order_date,total_amount,status")] Orders orders)

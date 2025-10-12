@@ -4,68 +4,137 @@
     ViewData["Title"] = "Index";
 }
 
-<h1>Index</h1>
+<h1 class="page-title">Customers</h1>
 
 <p>
-    <a asp-action="Create">Create New</a>
+    <a asp-action="Create" class="btn btn-fancy">Create New</a>
 </p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.first_name)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.last_name)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.email)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.address)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.city)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.postal_code)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.created_at)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.first_name)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.last_name)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.email)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.address)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.city)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.postal_code)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.created_at)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.customer_id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.customer_id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.customer_id">Delete</a>
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
+<div class="table-responsive">
+    <table class="table fancy-table">
+        <thead>
+            <tr>
+                <th>
+                    @Html.DisplayNameFor(model => model.first_name)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.last_name)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.email)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.address)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.city)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.postal_code)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.created_at)
+                </th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.first_name)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.last_name)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.email)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.address)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.city)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.postal_code)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.created_at)
+                    </td>
+                    <td class="action-links">
+                        <a asp-action="Edit" asp-route-id="@item.customer_id">Edit</a>
+                        <a asp-action="Details" asp-route-id="@item.customer_id">Details</a>
+                        <a asp-action="Delete" asp-route-id="@item.customer_id">Delete</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<style>
+    body {
+        background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%);
+    }
+
+    .fancy-table {
+        background: #fff;
+        border-radius: 16px;
+        box-shadow: 0 4px 24px rgba(60, 72, 88, 0.12);
+        overflow: hidden;
+    }
+
+        .fancy-table th {
+            background: #6366f1;
+            color: #fff;
+            font-weight: 600;
+            border: none;
+        }
+
+        .fancy-table td {
+            border-top: 1px solid #e5e7eb;
+            vertical-align: middle;
+        }
+
+        .fancy-table tr:hover {
+            background: #f3f4f6;
+            transition: background 0.2s;
+        }
+
+    .btn-fancy {
+        background: linear-gradient(90deg, #6366f1 0%, #60a5fa 100%);
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        padding: 6px 18px;
+        font-weight: 500;
+        transition: background 0.2s;
+    }
+
+        .btn-fancy:hover {
+            background: linear-gradient(90deg, #60a5fa 0%, #6366f1 100%);
+            color: #fff;
+        }
+
+    .page-title {
+        color: #6366f1;
+        font-weight: 700;
+        letter-spacing: 1px;
+        margin-bottom: 24px;
+        text-shadow: 0 2px 8px #e0e7ff;
+    }
+
+    .action-links a {
+        margin-right: 8px;
+        text-decoration: none;
+        color: #6366f1;
+        font-weight: 500;
+        transition: color 0.2s;
+    }
+
+        .action-links a:hover {
+            color: #60a5fa;
+            text-decoration: underline;
+        }
+</style>

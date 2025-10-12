@@ -1,42 +1,177 @@
 ﻿@model IceTask_5_LemonTree_Opium_.Models.Orders
-
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Order Details";
 }
 
-<h1>Details</h1>
+<h1 class="page-title">Order Details</h1>
 
-<div>
-    <h4>Orders</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.customer_id)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.customer_id)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.order_date)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.order_date)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.total_amount)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.total_amount)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.status)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.status)
-        </dd>
-    </dl>
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["SuccessMessage"]
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+}
+
+<hr />
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h4>Order Information</h4>
+            </div>
+            <div class="card-body">
+                <dl class="row">
+                    <dt class="col-sm-4">Order ID:</dt>
+                    <dd class="col-sm-8">@Model.order_id</dd>
+
+                    <dt class="col-sm-4">Customer ID:</dt>
+                    <dd class="col-sm-8">@Model.customer_id</dd>
+
+                    <dt class="col-sm-4">Order Date:</dt>
+                    <dd class="col-sm-8">@Model.order_date.ToString("yyyy-MM-dd HH:mm:ss")</dd>
+
+                    <dt class="col-sm-4">Status:</dt>
+                    <dd class="col-sm-8">
+                        @{
+                            string badgeClass = "secondary";
+                            if (Model.status == "pending")
+                            {
+                                badgeClass = "warning";
+                            }
+                            else if (Model.status == "processed")
+                            {
+                                badgeClass = "info";
+                            }
+                            else if (Model.status == "shipped")
+                            {
+                                badgeClass = "success";
+                            }
+                        }
+                        <span class="badge badge-@badgeClass">
+                            @Model.status.ToUpper()
+                        </span>
+                    </dd>
+
+                    <dt class="col-sm-4">Total Amount:</dt>
+                    <dd class="col-sm-8"><strong>R @Model.total_amount.ToString("N2")</strong></dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h4>Order Items</h4>
+            </div>
+            <div class="card-body">
+                @if (Model.OrderItems != null && Model.OrderItems.Any())
+                {
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Price</th>
+                                <th>Qty</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.OrderItems)
+                            {
+                                <tr>
+                                    <td>@item.Product.name</td>
+                                    <td>R @item.price_at_purchase.ToString("N2")</td>
+                                    <td>@item.quantity</td>
+                                    <td>R @((item.price_at_purchase * item.quantity).ToString("N2"))</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+                else
+                {
+                    <p class="text-muted">No items in this order.</p>
+                }
+            </div>
+        </div>
+    </div>
 </div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.order_id">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+
+<div class="mt-3">
+    <a asp-action="Edit" asp-route-id="@Model.order_id" class="btn btn-fancy">Edit</a>
+    <a asp-action="Index" class="btn btn-secondary btn-fancy">Back to List</a>
 </div>
+
+<style>
+    body {
+        background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%);
+    }
+
+    .card {
+        border-radius: 16px;
+        box-shadow: 0 4px 24px rgba(60, 72, 88, 0.12);
+        margin-bottom: 24px;
+        background: #fff;
+    }
+
+    .card-header {
+        background: linear-gradient(90deg, #6366f1 0%, #60a5fa 100%);
+        color: #fff;
+        border-radius: 16px 16px 0 0;
+        font-weight: 600;
+        font-size: 1.2rem;
+    }
+
+    .badge-warning {
+        background: #f59e42;
+        color: #fff;
+    }
+
+    .badge-info {
+        background: #60a5fa;
+        color: #fff;
+    }
+
+    .badge-success {
+        background: #34d399;
+        color: #fff;
+    }
+
+    .badge-secondary {
+        background: #a1a1aa;
+        color: #fff;
+    }
+
+    .page-title {
+        color: #6366f1;
+        font-weight: 700;
+        letter-spacing: 1px;
+        margin-bottom: 24px;
+        text-shadow: 0 2px 8px #e0e7ff;
+    }
+
+    .btn-fancy {
+        background: linear-gradient(90deg, #6366f1 0%, #60a5fa 100%);
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        padding: 6px 18px;
+        font-weight: 500;
+        transition: background 0.2s;
+        margin-right: 8px;
+    }
+
+        .btn-fancy:hover {
+            background: linear-gradient(90deg, #60a5fa 0%, #6366f1 100%);
+            color: #fff;
+        }
+
+    .table-sm th, .table-sm td {
+        border-top: 1px solid #e5e7eb;
+    }
+</style>
